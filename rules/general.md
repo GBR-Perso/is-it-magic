@@ -36,6 +36,16 @@ Never work around a missing tool with a global install or an ad-hoc fetch — ad
 - Don't refactor what isn't broken; match existing style even if you'd do it differently
 - Remove only the orphans your own change created — never delete pre-existing dead code, mention it instead
 
+## Comments
+
+A comment describes the member it sits on, as it is.
+
+- **Never point outward in space** — no claim about how another file behaves, who consumes this member, or what a caller guarantees. Such a claim rots the moment that other code moves, and then it misleads. State the constraint this member itself enforces instead.
+- **Never point outward in time** — no "added for", "was previously", "is unchanged", and no reference to a transient document (`REQ-1.3`, ticket ids). Permanent, globally-unique, never-renumbered records (`ADR-0029`) are fine. Once shipped, the code is the specification.
+- **Write one only for what the code cannot say** — an invariant the type does not express, a documented absence, the meaning of a sentinel, or why this construct rather than the obvious one.
+- **Delete any comment that restates its declaration.** No section labels.
+- This **overrides** matching the surrounding comment density: a codebase full of outward-pointing comments is not a pattern to match. Binds the comments you write or touch — pre-existing ones are reported, never swept (see *Surgical Changes*).
+
 ## Reason Before You Act
 
 - Re-read what was actually asked before committing to an approach — don't lock onto the first idea.

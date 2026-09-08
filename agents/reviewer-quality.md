@@ -132,7 +132,7 @@ _(repeat per file)_ Before assigning 🟡, write the concrete failure scenario i
 
 - **🔴 Violation**: Directly breaks a stated rule, is a defect that will produce wrong behaviour, or is a requirement-coverage gap or missing functionality. Must fix.
 - **🟡 Warning**: Must state a concrete failure scenario — the inputs or state under which it goes wrong and the wrong outcome — in the finding text. A finding without one is not a Warning. Should fix.
-- **🔵 Suggestion**: Everything else — clarity, naming, style, documentation wording, "consider" improvements, pre-existing conditions not introduced by the change, and any finding whose scenario is hypothetical. Nice to fix.
+- **🔵 Suggestion**: Everything else — clarity, naming, style, documentation wording (phrasing and clarity only — a comment that breaches a stated rule is a Violation, not wording), "consider" improvements, pre-existing conditions not introduced by the change, and any finding whose scenario is hypothetical. Nice to fix.
 
 ## Conversation Style
 
