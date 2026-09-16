@@ -1,6 +1,6 @@
 ---
 name: project-decide
-description: Decision layer between investigation/debug and implementation. Reads findings from the conversation, infers debt trajectory from the investigation evidence, weighs up to 4 distinct options — including retaining the status quo — with pros/cons and effort signal, and commits to a recommendation grounded in long-term maintainability and architectural correctness. Strictly read-only — no agents, no file I/O.
+description: Decision layer between investigation/debug and implementation. Reads findings from the conversation or from the report file a `/project-investigate` digest names, infers debt trajectory from the investigation evidence, weighs up to 4 distinct options — including retaining the status quo — with pros/cons and effort signal, and commits to a recommendation grounded in long-term maintainability and architectural correctness. Strictly read-only — no agents; its only file I/O is reading that one report file.
 ---
 
 ## Important rules
@@ -10,23 +10,25 @@ Read and follow all rules in `${CLAUDE_PLUGIN_ROOT}/skills/shared/_ux-rules.md`.
 ## Constraints
 
 - **Read-only.** This skill must never modify source files, configuration, Azure resources, or any project artefact.
-- **No agents.** This skill operates entirely from conversation context — it spawns no sub-agents and performs no file I/O.
-- **No re-scanning.** The skill reasons over findings already present in the conversation. It does not re-run Glob, Grep, or Read operations against the codebase.
+- **No agents. Reads at most one file.** This skill spawns no sub-agents. Its only file I/O is reading the single report file named by the most recent `/project-investigate` digest in the conversation (Phase 0) — no writes, no other reads.
+- **No re-scanning.** The skill reasons over findings already present in the conversation or in that one report file; it does not run Glob or Grep, and does not Read anything beyond the one report file located in Phase 0; it never re-scans the codebase itself.
 - **Option cap.** Generate at most 4 options. There is no minimum: retaining the status quo is always an admissible option and may stand as the sole recommendation, so a report need not manufacture alternatives to hit a quota.
 
 ## Input
 
 `$ARGUMENTS` — optional short framing supplied by the user (e.g. "focus on the auth layer", "we can't touch the DB schema"). If absent, the skill infers scope from the investigation or debug report already in the conversation.
 
-The skill's primary input is the **investigation or debug report already present in the conversation context**. It does not require the user to re-run a scan or re-paste findings.
+The skill's primary input is the **investigation or debug report**, read from the file its digest names, or (fallback) present directly in the conversation. It does not require the user to re-run a scan or re-paste findings.
 
 ---
 
 ### Phase 0 — Locate and absorb the report
 
-1. Scan the current conversation context for an Investigation Report or a Debug Report — both produced by `/project-investigate`. If both are present, prefer the most recent one.
+1. Scan the current conversation context for the most recent `## Debug digest —` or `## Investigation digest —` heading — both produced by `/project-investigate`. If found, `Read` the file named on its `**Full report**` line and treat its contents as the report.
 
-2. If no report is found in the conversation, stop and inform the user:
+2. If no digest is found, or the digest's named file cannot be read, scan instead for a legacy `## Debug Report —` or `## Investigation Report —` heading printed directly in the conversation (a transcript predating this handoff, or findings a user has pasted directly). If both a digest and a directly printed report are present, prefer the digest's file.
+
+3. If neither is found, stop and inform the user:
 
    Use `AskUserQuestion`:
    - Question: "No investigation or debug report was found in the conversation. Would you like to run one first, or paste the findings directly?"
@@ -36,7 +38,7 @@ The skill's primary input is the **investigation or debug report already present
 
    If the user selects "Paste findings now", accept their free-text input as the findings and continue.
 
-3. Read `$ARGUMENTS`. If provided, record it as the **user framing constraint** — it narrows the scope or excludes directions the user has ruled out. If absent, infer scope from the report content.
+4. Read `$ARGUMENTS`. If provided, record it as the **user framing constraint** — it narrows the scope or excludes directions the user has ruled out. If absent, infer scope from the report content.
 
 ---
 
@@ -48,7 +50,7 @@ The skill's primary input is the **investigation or debug report already present
    - Any constraints introduced by `$ARGUMENTS` (if provided)
 
 2. Present the Problem Statement to the user, then (see *Understanding-validation gates* in `_ux-rules.md`):
-   - **Input is a report produced in this conversation by `/project-investigate`** → proceed immediately without asking. The user already saw and approved those findings when the report was produced.
+   - **Input is a report produced by `/project-investigate` in this session — whether read from the file its digest named, or (legacy path) printed directly** → proceed immediately without asking; the user approved it either by selecting the digest's continue option or by seeing the full report printed.
    - **Input was pasted or supplied directly by the user** → ask for confirmation via `AskUserQuestion` only when the findings are materially ambiguous:
      - Question: "Before going further, I want to confirm the problem we are solving. Does this capture it correctly?"
      - Present the Problem Statement in the question text.

@@ -14,7 +14,7 @@ Read and follow all rules in `${CLAUDE_PLUGIN_ROOT}/skills/shared/_ux-rules.md`.
 
 ## Constraints
 
-- **Read-only.** This skill and every agent it spawns must never modify source files, configuration, or Azure resources.
+- **Read-only, with writes confined to `.claude/reports/`.** This skill and every agent it spawns must never modify source files, configuration, or Azure resources. Two writes are permitted, both scoped to `.claude/reports/`: Phase 3 of Debug Mode and Investigate Mode writes the full report itself, and the no-argument archaeology path's spawned agent writes its own report as part of its Phase 4 — mirroring the repo-archaeologist's carve-out. Agents spawned in Phase 1 (Debug Mode / Investigate Mode) must not write report files themselves.
 - **No fixes.** Report findings only; the user decides how to act on them.
 
 ## Input
@@ -43,11 +43,11 @@ When `$ARGUMENTS` is empty:
 2. If the user selects **"Run full repository archaeology"**:
    - Spawn the agent defined in `${CLAUDE_PLUGIN_ROOT}/agents/repo-archaeologist.md`.
      - Pass no additional arguments — the agent operates on the current working directory.
-     - Instruct it to complete all phases, return its structured summary, and **not write any report file**.
+     - Instruct it to complete all phases and return its structured summary. (The agent writes its own report file as part of its Phase 4 — do not override that.)
    - Wait for the agent to return its summary, then present it:
 
      ```markdown
-     <At-a-glance digest — see "Shared: At-a-glance digest" below. This path ends the skill, so use the closing line without the `/project-decide` clause.>
+     <At-a-glance digest — insert the block from "Shared: At-a-glance digest" above the summary.>
 
      ## Repository Archaeology — Summary
 
@@ -62,6 +62,8 @@ When `$ARGUMENTS` is empty:
 
      ### Documentation Gaps
      Total: N gaps (Type A: N — undocumented code | Type B: N — stale docs | Type C: N — unexplained rules)
+
+     **Report**: <path returned by the agent>
      ```
 
    - The skill ends here.
@@ -117,9 +119,9 @@ Using only Glob, Grep, and Read — no agents:
 <what static analysis cannot determine>
 ```
 
-Judge whether the quick scan has resolved the question or symptom with confidence, and state the verdict in one line — do not ask:
-- **Resolved** → end here, noting the user can ask to go deeper with agents if they want more.
-- **Not resolved** (material uncertainty remains, or the limitations listed above touch the core of the question) → say why in one line and proceed to Phase 1.
+Judge whether the quick scan has resolved the question or symptom with confidence:
+- **Resolved** → print the Quick Debug Summary block above in full, note the user can ask to go deeper with agents, and end here.
+- **Not resolved** → do NOT print the block above. Print only a one-to-two-line verdict — the suspected area and why it is not confirmed — then proceed to Phase 1. (Phase 3's digest supersedes this summary; printing both is the same ground twice.)
 
 #### Phase 1 — Parallel investigation
 
@@ -174,12 +176,17 @@ What could not be determined from static analysis alone.
 
 Same as Investigate Mode Phase 2.
 
-#### Phase 3 — Synthesise and report
+#### Phase 3 — Synthesise, write the report, and print the digest
+
+1. Run `date +%Y-%m-%d-%H%M%S` once; `mkdir -p .claude/reports`. Path = `.claude/reports/debug-<YYYY-MM-DD-HHMMSS>.md`. The first 10 characters of the timestamp are the in-file Date.
+
+2. Assemble the full report and write it to that path:
 
 ```markdown
-<At-a-glance digest — see "Shared: At-a-glance digest" below, with the `/project-decide` clause.>
+# Debug Report — <one-line issue title>
 
-## Debug Report — <one-line issue title>
+**Date**: <date>
+**Mode**: Bug hunt
 
 ### Issue
 <symptom from Phase 0 brief>
@@ -223,15 +230,19 @@ Same as Investigate Mode Phase 2.
 > - `/project-implement quick` — developer only, for small contained changes
 ```
 
-After presenting the Debug Report, ask via `AskUserQuestion`:
+3. Confirm the write; do not print the file's contents.
 
-- Question: "The Debug Report is complete. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads this report straight from the conversation — no need to re-run the investigation.)"
+4. Print only the "Shared: Executive digest" block (see below).
+
+After the digest, ask via `AskUserQuestion`:
+
+- Question: "The Debug Report has been written to `<path>`. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads the report file directly — no need to re-run the investigation.)"
 - Options:
   - `Continue to /project-decide now (Recommended)`
   - `Stop here — I'll decide what to do next`
 
-If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates this Debug Report in the conversation automatically.
-If **"Stop here"**: end the skill; the report remains in the conversation.
+If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates the report file via the digest automatically.
+If **"Stop here"**: end the skill; the full report remains at `<path>`.
 
 ---
 
@@ -256,9 +267,9 @@ Using only Glob, Grep, and Read — no agents:
 <what the quick scan could not determine>
 ```
 
-Judge whether the quick scan has resolved the question or symptom with confidence, and state the verdict in one line — do not ask:
-- **Resolved** → end here, noting the user can ask to go deeper with agents if they want more.
-- **Not resolved** (material uncertainty remains, or the limitations listed above touch the core of the question) → say why in one line and proceed to Phase 1.
+Judge whether the quick scan has resolved the question or symptom with confidence:
+- **Resolved** → print the Quick Findings block above in full, note the user can ask to go deeper with agents, and end here.
+- **Not resolved** → do NOT print the block above. Print only a one-to-two-line verdict — the suspected area and why it is not confirmed — then proceed to Phase 1. (Phase 3's digest supersedes this summary; printing both is the same ground twice.)
 
 #### Phase 1 — Parallel investigation
 
@@ -317,12 +328,17 @@ What could not be determined from static analysis alone.
 
 Same as Debug Mode Phase 2.
 
-#### Phase 3 — Synthesise and report
+#### Phase 3 — Synthesise, write the report, and print the digest
+
+1. Run `date +%Y-%m-%d-%H%M%S` once; `mkdir -p .claude/reports`. Path = `.claude/reports/investigation-<YYYY-MM-DD-HHMMSS>.md`. The first 10 characters of the timestamp are the in-file Date.
+
+2. Assemble the full report and write it to that path:
 
 ```markdown
-<At-a-glance digest — see "Shared: At-a-glance digest" below, with the `/project-decide` clause.>
+# Investigation Report — <one-line question title>
 
-## Investigation Report — <one-line question title>
+**Date**: <date>
+**Mode**: Analytical investigation
 
 ### Question
 <question from Phase 0 brief>
@@ -369,22 +385,28 @@ Same as Debug Mode Phase 2.
 > - `/project-implement quick` — developer only, for small contained changes
 ```
 
-After presenting the Investigation Report, ask via `AskUserQuestion`:
+3. Confirm the write; do not print the file's contents.
 
-- Question: "The Investigation Report is complete. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads this report straight from the conversation — no need to re-run the investigation.)"
+4. Print only the "Shared: Executive digest" block (see below).
+
+After the digest, ask via `AskUserQuestion`:
+
+- Question: "The Investigation Report has been written to `<path>`. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads the report file directly — no need to re-run the investigation.)"
 - Options:
   - `Continue to /project-decide now (Recommended)`
   - `Stop here — I'll decide what to do next`
 
-If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates this Investigation Report in the conversation automatically.
-If **"Stop here"**: end the skill; the report remains in the conversation.
+If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates the report file via the digest automatically.
+If **"Stop here"**: end the skill; the full report remains at `<path>`.
 
 ---
 
 ## Shared: At-a-glance digest
 
 Insert this block immediately above the report's own `## …` heading, inside the same fenced
-template. Additive only — never replace or reorder anything below it.
+template. Additive only — never replace or reorder anything below it. This block applies only to the
+no-argument archaeology summary — the Debug Report and Investigation Report print the executive digest
+below instead.
 
 ```markdown
 ## At a glance
@@ -394,14 +416,40 @@ template. Additive only — never replace or reorder anything below it.
 **Shape**:
 <ASCII flow, at most 5 hops — e.g. `Controller → Service → Repository → SQL (fails here)` — or one line of prose if no traceable path applies>
 
-> Digest only. The full report below is unabridged<closing clause — see below>.
+> Digest only. The full report below is unabridged.
 ```
 
-**Closing clause — Debug Report and Investigation Report**: ` and is what \`/project-decide\` reads`. Both are located by `/project-decide` Phase 0 by scanning the conversation for their own heading.
-
-**Closing clause — no-argument archaeology path**: none — the sentence ends at "unabridged". That path ends the skill (see step 2 under *No-argument behaviour*); there is no report here for `/project-decide` to read, so asserting the handoff would be false.
-
 **Bound**: at most 8 lines, at most ~60 words. No diagrams — this output is printed in a terminal. If the finding has no traceable path, write one line of prose in **Shape** rather than drawing a nominal flow.
+
+---
+
+## Shared: Executive digest (Debug Report / Investigation Report)
+
+Phase 3 of Debug Mode and Investigate Mode prints this block instead of the full report — the full
+report has already been written to `.claude/reports/` in the same phase.
+
+```markdown
+## <Debug|Investigation> digest — <one-line issue/question title>
+
+- <grounded finding, ~20 words> (`path/to/file:line`)
+- <up to 8 bullets total>
+
+**Full report**: `.claude/reports/<debug|investigation>-<YYYY-MM-DD-HHMMSS>.md`
+**Next step**: `/project-decide` reads that file directly — no need to re-run the investigation.
+```
+
+Composition rules:
+- Skip any row whose source did not run — omit the row entirely, never print "Not investigated".
+- Row order: (1) root cause / summary bullet, with `file:line`; (2) up to 3 key-evidence bullets, each
+  `file:line` — drawn from Evidence / Relevant Code Areas, or, where it is the more load-bearing
+  finding, from Related Tests, Patterns & Characteristics, or Design Tradeoffs; (3) one call/data-flow
+  bullet, prose, hop arrows allowed, no diagram; (4) a Browser verdict bullet, only if Browser was
+  investigated; (5) an Azure verdict bullet, only if Azure was investigated; (6) the top
+  open-uncertainty bullet, only if material.
+- Every section of the full report is covered by a row above or by this sentence: a template section
+  that does not surface a bullet is intentionally held in the file only, not silently dropped.
+- Bound: at most 8 bullets total, each one line (~20 words). The two closing lines above replace the
+  old four-mode `/project-implement` footer entirely.
 
 ---
 
