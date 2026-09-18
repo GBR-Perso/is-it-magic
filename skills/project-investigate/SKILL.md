@@ -14,7 +14,7 @@ Read and follow all rules in `${CLAUDE_PLUGIN_ROOT}/skills/shared/_ux-rules.md`.
 
 ## Constraints
 
-- **Read-only, with writes confined to `.claude/reports/`.** This skill and every agent it spawns must never modify source files, configuration, or Azure resources. Two writes are permitted, both scoped to `.claude/reports/`: Phase 3 of Debug Mode and Investigate Mode writes the full report itself, and the no-argument archaeology path's spawned agent writes its own report as part of its Phase 4 — mirroring the repo-archaeologist's carve-out. Agents spawned in Phase 1 (Debug Mode / Investigate Mode) must not write report files themselves.
+- **Read-only.** This skill itself never writes a file, in any of its three paths, and every agent it spawns must never modify source files, configuration, or Azure resources. The one write anywhere in this skill's flows belongs to an agent, not the skill: on the no-argument archaeology path, the spawned `repo-archaeologist` agent writes its own report as part of its own Phase 4 — the same behaviour that agent has outside this skill. Debug Mode and Investigate Mode write nothing, at any phase; their Phase 1 agents keep their existing "do not write any report file" spawn instructions, unchanged.
 - **No fixes.** Report findings only; the user decides how to act on them.
 
 ## Input
@@ -176,17 +176,12 @@ What could not be determined from static analysis alone.
 
 Same as Investigate Mode Phase 2.
 
-#### Phase 3 — Synthesise, write the report, and print the digest
+#### Phase 3 — Synthesise and report
 
-1. Run `date +%Y-%m-%d-%H%M%S` once; `mkdir -p .claude/reports`. Path = `.claude/reports/debug-<YYYY-MM-DD-HHMMSS>.md`. The first 10 characters of the timestamp are the in-file Date.
-
-2. Assemble the full report and write it to that path:
+Assemble the full report:
 
 ```markdown
-# Debug Report — <one-line issue title>
-
-**Date**: <date>
-**Mode**: Bug hunt
+## Debug Report — <one-line issue title>
 
 ### Issue
 <symptom from Phase 0 brief>
@@ -208,12 +203,12 @@ Same as Investigate Mode Phase 2.
 ---
 
 ### Browser Findings
-<Browser Findings section — or "Not investigated">
+<Browser Findings section — omit this heading and its surrounding `---` separators entirely if Browser was not investigated>
 
 ---
 
 ### Azure Findings
-<Azure Findings Report — or "Not investigated", "Skipped by user", "Not logged in">
+<Azure Findings Report, or a one-line "Skipped by user" / "Not logged in" entry — omit this heading and its surrounding `---` separators entirely if Azure was not investigated>
 
 ---
 
@@ -223,26 +218,21 @@ Same as Investigate Mode Phase 2.
 ---
 
 > This report is read-only. No code or infrastructure was modified.
-> **Next step**: use `/project-decide` to evaluate solution options, or `/project-requirements` to go straight to requirements — then use `/project-implement` to act:
-> - `/project-implement` — full architect → dev → test → review pipeline (default)
-> - `/project-implement draft` — architect + developer only, for fast iteration
-> - `/project-implement increment` — developer + test loop, no architect or review (tested change to live code)
-> - `/project-implement quick` — developer only, for small contained changes
+
+---
+
+<Executive digest — see "Shared: Executive digest" below.>
 ```
 
-3. Confirm the write; do not print the file's contents.
+After the report, ask via `AskUserQuestion`:
 
-4. Print only the "Shared: Executive digest" block (see below).
-
-After the digest, ask via `AskUserQuestion`:
-
-- Question: "The Debug Report has been written to `<path>`. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads the report file directly — no need to re-run the investigation.)"
+- Question: "The Debug Report is complete. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads this report straight from the conversation — no need to re-run the investigation.)"
 - Options:
   - `Continue to /project-decide now (Recommended)`
   - `Stop here — I'll decide what to do next`
 
-If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates the report file via the digest automatically.
-If **"Stop here"**: end the skill; the full report remains at `<path>`.
+If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates this Debug Report in the conversation automatically.
+If **"Stop here"**: end the skill; the report remains in the conversation.
 
 ---
 
@@ -328,17 +318,12 @@ What could not be determined from static analysis alone.
 
 Same as Debug Mode Phase 2.
 
-#### Phase 3 — Synthesise, write the report, and print the digest
+#### Phase 3 — Synthesise and report
 
-1. Run `date +%Y-%m-%d-%H%M%S` once; `mkdir -p .claude/reports`. Path = `.claude/reports/investigation-<YYYY-MM-DD-HHMMSS>.md`. The first 10 characters of the timestamp are the in-file Date.
-
-2. Assemble the full report and write it to that path:
+Assemble the full report:
 
 ```markdown
-# Investigation Report — <one-line question title>
-
-**Date**: <date>
-**Mode**: Analytical investigation
+## Investigation Report — <one-line question title>
 
 ### Question
 <question from Phase 0 brief>
@@ -363,12 +348,12 @@ Same as Debug Mode Phase 2.
 ---
 
 ### Browser Findings
-<Browser Findings section — or "Not investigated">
+<Browser Findings section — omit this heading and its surrounding `---` separators entirely if Browser was not investigated>
 
 ---
 
 ### Azure Findings
-<Azure Findings Report — or "Not investigated", "Skipped by user", "Not logged in">
+<Azure Findings Report, or a one-line "Skipped by user" / "Not logged in" entry — omit this heading and its surrounding `---` separators entirely if Azure was not investigated>
 
 ---
 
@@ -378,26 +363,21 @@ Same as Debug Mode Phase 2.
 ---
 
 > This report is read-only. No code or infrastructure was modified.
-> **Next step**: use `/project-decide` to evaluate solution options, or `/project-requirements` to go straight to requirements — then use `/project-implement` to act:
-> - `/project-implement` — full architect → dev → test → review pipeline (default)
-> - `/project-implement draft` — architect + developer only, for fast iteration
-> - `/project-implement increment` — developer + test loop, no architect or review (tested change to live code)
-> - `/project-implement quick` — developer only, for small contained changes
+
+---
+
+<Executive digest — see "Shared: Executive digest" below.>
 ```
 
-3. Confirm the write; do not print the file's contents.
+After the report, ask via `AskUserQuestion`:
 
-4. Print only the "Shared: Executive digest" block (see below).
-
-After the digest, ask via `AskUserQuestion`:
-
-- Question: "The Investigation Report has been written to `<path>`. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads the report file directly — no need to re-run the investigation.)"
+- Question: "The Investigation Report is complete. Continue to `/project-decide` now to evaluate solution options? (`/project-decide` reads this report straight from the conversation — no need to re-run the investigation.)"
 - Options:
   - `Continue to /project-decide now (Recommended)`
   - `Stop here — I'll decide what to do next`
 
-If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates the report file via the digest automatically.
-If **"Stop here"**: end the skill; the full report remains at `<path>`.
+If **"Continue to /project-decide now"**: invoke `/project-decide` with no arguments — it locates this Investigation Report in the conversation automatically.
+If **"Stop here"**: end the skill; the report remains in the conversation.
 
 ---
 
@@ -425,17 +405,17 @@ below instead.
 
 ## Shared: Executive digest (Debug Report / Investigation Report)
 
-Phase 3 of Debug Mode and Investigate Mode prints this block instead of the full report — the full
-report has already been written to `.claude/reports/` in the same phase.
+Phase 3 of Debug Mode and Investigate Mode prints this block at the end of the same template,
+immediately after the full report and its read-only note — this is what is on screen when the run
+finishes; the full report above it is a scroll away.
 
 ```markdown
-## <Debug|Investigation> digest — <one-line issue/question title>
+## Executive digest
 
 - <grounded finding, ~20 words> (`path/to/file:line`)
 - <up to 8 bullets total>
 
-**Full report**: `.claude/reports/<debug|investigation>-<YYYY-MM-DD-HHMMSS>.md`
-**Next step**: `/project-decide` reads that file directly — no need to re-run the investigation.
+**Next step**: `/project-decide` reads the report above — no need to re-run the investigation.
 ```
 
 Composition rules:
@@ -447,8 +427,9 @@ Composition rules:
   investigated; (5) an Azure verdict bullet, only if Azure was investigated; (6) the top
   open-uncertainty bullet, only if material.
 - Every section of the full report is covered by a row above or by this sentence: a template section
-  that does not surface a bullet is intentionally held in the file only, not silently dropped.
-- Bound: at most 8 bullets total, each one line (~20 words). The two closing lines above replace the
+  that does not surface a bullet is intentionally held in the report body above only, not silently
+  dropped.
+- Bound: at most 8 bullets total, each one line (~20 words). The next-step line above replaces the
   old four-mode `/project-implement` footer entirely.
 
 ---

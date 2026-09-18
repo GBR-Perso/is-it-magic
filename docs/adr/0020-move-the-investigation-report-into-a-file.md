@@ -1,6 +1,6 @@
 # 0020. Move the investigation report into a file, print an executive digest
 
-**Status**: Accepted
+**Status**: Superseded by [ADR-0021](0021-return-the-investigation-report-to-the-conversation.md)
 **Date**: 2026-09-16
 **Scopes**: [ADR-0019](0019-give-the-human-reader-a-proactive-door.md)
 
