@@ -38,15 +38,13 @@ Never work around a missing tool with a global install or an ad-hoc fetch — ad
 
 ## Comments
 
-A comment must earn its place and must never outgrow the code it sits on. Too many are worse than none: the wall of true-but-useless comments is what hides the false one.
+Comments are the exception. The code is the specification.
 
-- **Write one only to prevent a specific wrong change** — name the change it prevents: adding an index that must not exist, storing a value that must stay derived, "simplifying" a deliberate construct, treating a sentinel as a real value. If no wrong change can be named, don't write it. A comment that describes rather than prevents — how something works, where other fields live, easily-acquired domain knowledge — is noise even when true; if the fact matters, it belongs in an ADR.
-- **Keep it smaller than what it annotates** — a justified comment states its constraint in one to three lines. If the why needs a paragraph, write the ADR and leave one line pointing at it.
-- **Never point outward in space** — no claim about how another file behaves, who consumes this member, or what a caller guarantees. Such a claim rots the moment that other code moves, and then it misleads. State the constraint this member itself enforces instead.
-- **Never point outward in time** — no "added for", "was previously", "is unchanged", and no reference to a transient document (`REQ-1.3`, ticket ids). Permanent, globally-unique, never-renumbered records (`ADR-0029`) are fine. Once shipped, the code is the specification.
-- **State it once, in its home** — an invariant lives on the member that owns it, never repeated on properties or files that merely reference it.
-- **Delete any comment that restates its declaration.** No section labels.
-- This **overrides** matching the surrounding comment density: an over-commented codebase is not a pattern to match. Binds the comments you write or touch — pre-existing ones are reported, never swept (see *Surgical Changes*).
+- Write one only to prevent a specific, nameable wrong change. Can't name it → don't write it.
+- One to three lines. A longer why goes in an ADR, with one line pointing to it.
+- Never restate the declaration, repeat a fact, describe how code works, label sections, or point to other files, callers, tickets or history. ADR ids are fine.
+- At most one comment line per five code lines added. Never match the surrounding density.
+- Pre-existing comments are reported, never swept.
 
 ## Reason Before You Act
 
@@ -58,5 +56,5 @@ A comment must earn its place and must never outgrow the code it sits on. Too ma
 
 ## Understand & Verify
 
-- Read the surrounding code and match its patterns before changing it; check whether something already exists before adding it.
+- Read the surrounding code and match its patterns (comment density excepted) before changing it; check whether something already exists before adding it.
 - "It should work" is not done — build it, run it, and observe the behaviour you changed.
