@@ -9,7 +9,7 @@
 - Conventional commits: `type(scope): description` (feat / fix / chore / refactor) — applies to direct commits too
 - Commit directly on `main` — commits may span multiple concerns — **unless a project rule requires otherwise, in which case the project rule takes precedence**
 - Never push to remote without user confirmation
-- **Never use destructive local git commands** — `git checkout -- <path>`, `git restore`, `git reset --hard`, `git clean` are forbidden for any agent, at any time. Handle unwanted or out-of-scope edits non-destructively: report them, or undo only the agent's own edits by re-editing the specific lines back — never by reverting the working tree. The prohibition is on discarding uncommitted work or reverting the tree to a prior state; restoring lost work from an internal recovery checkpoint is not covered.
+- **Never use destructive local git commands** (`git checkout -- <path>`, `git restore`, `git reset --hard`, `git clean`), for any agent, at any time. Undo only your own edits, by re-editing the lines; report any other unwanted change. Restoring lost work from an internal recovery checkpoint is allowed.
 
 ## Dependencies — No Global Installs
 
@@ -28,13 +28,23 @@ Never work around a missing tool with a global install or an ad-hoc fetch — ad
 - Minimum code that solves the problem — nothing speculative
 - No abstractions for single-use code; no "flexibility" or configurability that wasn't requested
 - No error handling for impossible scenarios
-- If it could be half the size, rewrite it — would a senior engineer call this overcomplicated?
+- If your code could be half the size, rewrite it before handing it over.
 
 ## Surgical Changes
 
 - Touch only what the task requires — don't "improve" adjacent code, comments, or formatting
-- Don't refactor what isn't broken; match existing style even if you'd do it differently (comment density excepted — see *Comments*)
+- Don't refactor what isn't broken; match existing style even if you'd do it differently (comment density excepted — see _Comments_)
 - Remove only the orphans your own change created — never delete pre-existing dead code, mention it instead
+
+## Writing
+
+Applies to everything written: docs, requirements, artefacts, comments and replies. We are not writing a book.
+
+- Lead with the content. No intro that restates the heading, table or diagram below it, and no closing recap.
+- Say each fact once. Never repeat what is already on the page.
+- Cut any sentence whose removal loses no information.
+- Report a change by its result, not by an inventory of what was cut or a "read it back, it's right" line.
+- Change only what was asked. A content problem found while editing is raised, never silently fixed.
 
 ## Comments
 
@@ -56,5 +66,5 @@ Comments are the exception. The code is the specification.
 
 ## Understand & Verify
 
-- Read the surrounding code and match its patterns (comment density excepted) before changing it; check whether something already exists before adding it.
+- Read the surrounding code before changing it; check whether something already exists before adding it.
 - "It should work" is not done — build it, run it, and observe the behaviour you changed.

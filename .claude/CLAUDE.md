@@ -8,7 +8,7 @@ This is the **base** plugin in the layered model — broad, general-purpose, ins
 
 ## Plugin Structure
 
-- `skills/` — 21 skills as `<name>/SKILL.md` + shared architecture docs in `skills/shared/`
+- `skills/` — 20 skills as `<name>/SKILL.md` + shared architecture docs in `skills/shared/`
 - `agents/` — 14 agent definitions (implementation pipeline, investigation, security scanners)
 - `rules/` — 6 rule files (synced to `~/.claude/rules/` by `/devbox-init`, then auto-loaded natively by Claude Code)
 - `.claude-plugin/plugin.json` — plugin manifest
