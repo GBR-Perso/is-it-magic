@@ -139,3 +139,7 @@ Pushed to: main
 To update in consumer projects:
   claude plugin update <plugin-name>
 ```
+
+#### 9. Publish
+
+If a `plugin-publish` skill is available in this session, ask via `AskUserQuestion` whether to run it now (`Publish now (Recommended)` / `Not now`). On yes, invoke it from REPO_ROOT. Otherwise skip this step.
