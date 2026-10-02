@@ -16,7 +16,9 @@ defines the kind of repo sought — never on folder names.
 1. Start at the current working directory.
 2. Walk up through ancestors, up to MAX_LEVELS or the filesystem/drive root (whichever comes first).
 3. At each ancestor level, scan child and grandchild directories (depth 1–2) for any containing MARKER.
-4. Collect every match, deduplicated by absolute path → CANDIDATES.
+4. For MARKER `.claude-plugin/plugin.json`, a directory containing `.claude-plugin/marketplace.json` also
+   contributes each `plugins/<name>/` beneath it that contains MARKER.
+5. Collect every match, deduplicated by absolute path → CANDIDATES.
 
 Depth 1–2 covers both common layouts without hardcoding either:
 

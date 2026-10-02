@@ -3,12 +3,12 @@
   "owner": {
     "name": "Brourhant Guillaume"
   },
+  "description": "Personal catalogue of Claude plugins. Each plugin lives in plugins/<name>/.",
   "plugins": [
     {
       "name": "is-it-magic",
-      "source": "./",
-      "description": "GBR development workflow — agents, orchestration skills, project init, and language rules.",
-      "version": "1.0.0"
+      "source": "./plugins/is-it-magic",
+      "description": "General AI development workflow — agents, orchestration skills, language rules, and machine setup."
     }
   ]
 }

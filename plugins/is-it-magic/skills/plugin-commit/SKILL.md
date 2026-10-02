@@ -15,6 +15,8 @@ Analyse the changes in this plugin repo, determine the correct semantic version 
 
 Store the resolved path as REPO_ROOT.
 
+Resolve PLUGIN_ROOT: REPO_ROOT if `<REPO_ROOT>/.claude-plugin/plugin.json` exists; otherwise the `<REPO_ROOT>/plugins/<name>/` folder holding a `.claude-plugin/plugin.json` whose files appear in the diff. If several plugins changed, ask which one to release — one release per run.
+
 ## Steps
 
 ### Phase 1 — Execute
@@ -31,7 +33,7 @@ git -C "<REPO_ROOT>" status --short
 git -C "<REPO_ROOT>" log --oneline -5
 ```
 
-Read `<REPO_ROOT>/.claude-plugin/plugin.json` to get the current version.
+Read `<PLUGIN_ROOT>/.claude-plugin/plugin.json` to get the current version.
 
 #### 2. Ask for the commit message
 
@@ -78,7 +80,7 @@ If the user picks an override, recompute the new version accordingly.
 #### 5. Update the plugin manifest version
 
 Edit in place:
-- `<REPO_ROOT>/.claude-plugin/plugin.json` — `version` field
+- `<PLUGIN_ROOT>/.claude-plugin/plugin.json` — `version` field
 
 #### 6. Commit
 
@@ -87,14 +89,16 @@ Stage only the plugin's own content directories — never `git add -A` or `git a
 Not every plugin has every directory. Git aborts the **entire** `add` with `fatal: pathspec '<dir>' did not match any files` if even one pathspec is unmatched, staging nothing, so build the list from what actually exists:
 
 ```bash
-cd "<REPO_ROOT>"
+cd "<PLUGIN_ROOT>"
 PLUGIN_PATHS=""
-for d in .claude-plugin skills agents rules conventions templates hooks commands; do
-  if [ -d "$d" ]; then PLUGIN_PATHS="$PLUGIN_PATHS $d"; fi
+for d in .claude-plugin skills agents rules conventions scripts templates hooks commands README.md; do
+  if [ -e "$d" ]; then PLUGIN_PATHS="$PLUGIN_PATHS $d"; fi
 done
 [ -n "$PLUGIN_PATHS" ] || { echo "No plugin content directories found in $PWD — stop and report."; exit 1; }
-git -C "<REPO_ROOT>" add -- $PLUGIN_PATHS
+git add -- $PLUGIN_PATHS
 ```
+
+When PLUGIN_ROOT is not REPO_ROOT, also stage `<REPO_ROOT>/.claude-plugin/marketplace.json` and `<REPO_ROOT>/README.md` if they changed.
 
 Use the `if ... then ... fi` form inside the loop, **not** `[ -d "$d" ] && PLUGIN_PATHS=...`. A `for` loop exits with the status of its last command, so with the `&&` form a final directory that does not exist (`commands` is usually absent) makes the whole loop return non-zero. Chained as `probe && git add ...`, the `add` is then silently skipped and the commit stages nothing. The `if` form always exits `0`.
 
