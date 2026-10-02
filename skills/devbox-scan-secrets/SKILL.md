@@ -1,6 +1,6 @@
 ---
 name: devbox-scan-secrets
-description: "Audit the local dev machine for exposed secrets — credential files, private keys, cloud credentials, and hardcoded tokens. Writes a CSV report to .claude/secret-audit-<date>.csv."
+description: "Audit the local dev machine for exposed secrets — credential files, private keys, cloud credentials, and hardcoded tokens. Writes a dated CSV report to .claude/secret-audit-YYYY-MM-DD.csv."
 ---
 
 ## Important rules
