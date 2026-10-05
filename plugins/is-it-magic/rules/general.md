@@ -1,6 +1,6 @@
 # General Engineering Standards
 
-- Windows environment — use PowerShell for scripts
+- Scripts: Python 3, standard library only; PowerShell only for Windows-specific tasks; follow a folder's existing language; ask before using any other.
 - British English in all comments and documentation
 
 ## Git
