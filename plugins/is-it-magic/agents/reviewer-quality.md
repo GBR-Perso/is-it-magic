@@ -47,7 +47,7 @@ Detect the project's formatter/linter toolchain from its manifests and config, t
 
     Check categories:
     - **Rule violations** — direct breaches of a rule (highest severity)
-    - **Comment discipline** (always a 🔴 Violation) — a comment added by this change that restates its declaration, repeats a fact already stated elsewhere in the change, describes instead of preventing a nameable wrong change, or runs past three lines; and a failed comment-budget command, when the orchestrating skill passes one (run it from the project root). List each offending comment by line with "cut" or "shorten to: …".
+    - **Comment discipline** (always a 🔴 Violation) — a comment (controller XML docs excepted) added by this change that restates its declaration, repeats a fact already stated elsewhere in the change, describes instead of preventing a nameable wrong change, or runs past three lines; and a failed comment-budget command, when the orchestrating skill passes one (run it from the project root). List each offending comment by line with "cut" or "shorten to: …".
     - **Style issues** — naming, formatting, or convention deviations that tools couldn't fix. Lighter commenting than neighbouring files is never a deviation.
     - **Design concerns** — architecture, responsibility, abstraction problems
     - **Safety flags** — security, data exposure, or guarded-setting risks

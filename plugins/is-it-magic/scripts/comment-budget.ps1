@@ -8,6 +8,8 @@ $CStyleExtensions = @('.cs', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.vue
 $HashStyleExtensions = @('.py', '.ps1', '.psm1', '.sh', '.tf', '.rb')
 $MarkupCommentExtensions = @('.vue', '.html')
 $ExcludedPathPattern = '(^|/)(Migrations|generated)/|\.g\.cs$|\.Designer\.cs$|\.d\.ts$|\.min\.js$'
+$ApiDocPathPattern = '(^|/)Controllers/.+\.cs$'
+$ApiDocPrefix = '^\s*///'
 
 $CStylePrefix = '^(///?|/\*\*?|\*/|\*)'
 $HashPrefix = '^#'
@@ -50,7 +52,10 @@ $rows = foreach ($file in $addedLinesByFile.Keys) {
     $isSource = ($CStyleExtensions + $HashStyleExtensions + $MarkupCommentExtensions) -contains $extension
     if (-not $isSource -or $file -match $ExcludedPathPattern) { continue }
 
-    $kinds = $addedLinesByFile[$file] | ForEach-Object { Get-LineKind $_ $extension }
+    $lines = $addedLinesByFile[$file]
+    # Controller XML docs feed the OpenAPI spec: they are API documentation, not comments.
+    if ($file -match $ApiDocPathPattern) { $lines = $lines | Where-Object { $_ -notmatch $ApiDocPrefix } }
+    $kinds = $lines | ForEach-Object { Get-LineKind $_ $extension }
     $code = @($kinds | Where-Object { $_ -eq 'code' }).Count
     $comment = @($kinds | Where-Object { $_ -eq 'comment' }).Count
     $allowed = [Math]::Max($MinAllowancePerFile, [Math]::Floor($code * $CommentLinesPerCodeLine))

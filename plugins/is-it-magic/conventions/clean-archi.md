@@ -22,7 +22,8 @@ Infrastructure is never referenced by Application or Domain.
 
 ## Naming
 
-- Commands `{Verb}{Entity}Command`; Queries `Get{Entity}Query` / `List{Entities}Query`
+- Queries `Get{Entity}Query` / `Get{Entities}Query`; `Download{File}Query` (stored file); `Export{Entities}Query` (generated file)
+- Commands `{Verb}{Entity}Command`; `Upload{File}Command` (store a file); `Import{Entities}Command` (file → entities)
 - Handlers `{Command/Query}Handler`; Validators `{Command/Query}Validator`
 - Repositories `I{Entity}Repository` (interface) / `{Entity}Repository` (impl)
 

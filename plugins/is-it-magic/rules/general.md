@@ -55,6 +55,7 @@ Comments are the exception. The code is the specification.
 - Never restate the declaration, repeat a fact, describe how code works, label sections, or point to other files, callers, tickets or history. ADR ids are fine.
 - At most one comment line per five code lines added. Never match the surrounding density.
 - Pre-existing comments are reported, never swept.
+- Controller XML docs (`///`, feeding the OpenAPI spec) are API documentation, not comments: outside these rules and the budget. Keep them to what an API consumer needs.
 
 ## Reason Before You Act
 

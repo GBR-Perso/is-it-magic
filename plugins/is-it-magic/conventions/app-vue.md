@@ -8,6 +8,7 @@
 - Composition API only (no Options API); `<script setup lang="ts">`.
 - One component per file; props defined inline with `defineProps<{ ... }>()` — no separate interface.
 - Components: PascalCase (`UserCard.vue`), PascalCase in templates too (`<PageLayout>` not `<page-layout>`).
+- Pages: `{Entity}.vue` for one entity, `{Entity}List.vue` for a collection — never the plural (`VehicleList.vue`, not `Vehicles.vue`).
 - Split a component once it grows past ~200–300 lines — extract logic into a `useXxx.ts` composable.
 
 ## State (Pinia)
