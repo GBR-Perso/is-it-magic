@@ -12,7 +12,6 @@ paths:
 
 ```
 docs/adr/
-  README.md        format, status values, register (number · date · title · status)
   DIGEST.md        the rules in force today — the only file loaded every session
   NNNN-kebab-case-title.md
 ```
@@ -95,7 +94,5 @@ each the binding rule in one or two lines plus a link to the full ADR.
 1. Draft title, decision, why and how-to-apply from the conversation; confirm them with the user in
    one exchange.
 2. Find any ADR it supersedes or extends; update the old one's `Status` if it is overturned.
-3. Write `NNNN-….md` with the next free number.
-4. Add the register row to `README.md` (number, date, title, status — no summary).
-5. Update `DIGEST.md`.
-6. For the project's first ADR, also create `README.md` and `DIGEST.md` and add the `DIGEST.md` import line to `CLAUDE.md`.
+3. Write `NNNN-….md` with the highest existing number plus one.
+4. Update `DIGEST.md`. For the project's first ADR, create it and add its import line to `CLAUDE.md`.
