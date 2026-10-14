@@ -13,7 +13,7 @@ Personal catalogue of Claude plugins, and home of the `is-it-magic` plugin. No b
 
 Changes here affect every project that uses the plugin.
 
-- `is-it-magic` is the **base** plugin in the layered model — broad, general-purpose, installed user-level. Company-scoped plugins layer on top per project. Where a skill, agent or rule belongs: @../docs/plugin-model.md.
+- `is-it-magic` is the **base** plugin in the layered model — broad, general-purpose, installed user-level. Company-scoped plugins layer on top per project. Where a skill, agent or rule belongs: @../docs/plugin-model.md
 - Nothing at a plugin's root besides its components is loaded by consumers — put context for them in a skill, not a `CLAUDE.md`.
 - Skills reference shared docs via `${CLAUDE_PLUGIN_ROOT}/skills/shared/` — keep `shared/` as a sibling of the skill folders.
 - Agent references in skills use `${CLAUDE_PLUGIN_ROOT}/agents/<name>.md`, never `.claude/agents/` (that is the consumer project).

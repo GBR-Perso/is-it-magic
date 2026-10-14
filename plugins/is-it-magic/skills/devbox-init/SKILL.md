@@ -88,7 +88,7 @@ ls "${CLAUDE_PLUGIN_ROOT}/rules/"*.md
 Get-ChildItem -Path "${CLAUDE_PLUGIN_ROOT}/rules" -Filter "*.md" -File
 ```
 
-Expected files include (e.g.) `general.md`, `csharp-lang.md`, `typescript-lang.md`, `infra-lang.md`, `infra-naming.md`, `python-lang.md` — but the actual set is whatever `.md` files are present in `PLUGIN_RULES_DIR` at runtime. The glob commands above are the authoritative enumeration; the list here is illustrative only.
+Expected files include (e.g.) `general.md`, `csharp-lang.md`, `typescript-lang.md`, `infra-lang.md`, `infra-naming.md`, `python-lang.md`, `adr.md` — but the actual set is whatever `.md` files are present in `PLUGIN_RULES_DIR` at runtime. The glob commands above are the authoritative enumeration; the list here is illustrative only.
 
 Store the result as `FILES_FOUND`.
 
