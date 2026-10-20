@@ -67,5 +67,5 @@ Comments are the exception. The code is the specification.
 
 ## Understand & Verify
 
-- Read the surrounding code before changing it; check whether something already exists before adding it.
+- Read the surrounding code before changing it, and before proposing a change in another repo read its CLAUDE.md and what it imports (they don't load from outside the session's folder); check whether something already exists before adding it.
 - "It should work" is not done — build it, run it, and observe the behaviour you changed.
