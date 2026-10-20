@@ -44,6 +44,8 @@ Common values: `ekla` (personal/ekla projects). Any short lowercase string is va
 
 ### Purpose values
 
+Common codes below. When none says what the resource is for, use a short lowercase word that does (e.g. `mail`, `sync`); prefer it to `sc`.
+
 | Code  | Meaning                                                                                                 |
 | ----- | ------------------------------------------------------------------------------------------------------- |
 | `fe`  | Frontend                                                                                                |
