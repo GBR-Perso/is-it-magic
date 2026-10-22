@@ -60,7 +60,7 @@ This syncs all bundled plugin rules into `~/.claude/rules/` so they load globall
 | `/project-requirements` | Produce a formal, versioned requirements document for app evolution — never proposes implementation details.                                                                   |
 | `/project-implement`    | Implement a requirement. `full` (default): architect → dev → test → review. `draft`: architect + dev only. `quick`: dev only. Never commits.                                   |
 | `/project-port`         | Port files or a feature between sibling projects under the same parent directory — merges or copies intelligently. Never stages or commits.                                     |
-| `/apply-conventions`    | Inject generic convention bundles (clean architecture, Vue app, …) into this project — copies them into `.claude/` and links them via `@import` in `CLAUDE.md` as guidance. Idempotent. |
+| `/apply-conventions`    | Inject generic convention bundles (clean architecture, Vue app, MCP server, …) into this project — copies them into `.claude/` and links them via `@import` in `CLAUDE.md` as guidance. Idempotent. |
 
 ### Repository operations
 
