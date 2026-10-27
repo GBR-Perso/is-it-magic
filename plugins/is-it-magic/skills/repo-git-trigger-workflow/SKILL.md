@@ -173,10 +173,11 @@ If the selection contains a **plan/apply pair** (detected in step 3), the gate m
      gh run list --workflow=<plan-file> --repo <TARGET_REPO> --limit 1 --json databaseId,conclusion -q '.[0]'
      ```
   2. **If `conclusion` is not `success`** (failure, cancelled, timed out) → do **not** offer apply. Report the failed plan run URL and **stop**.
-  3. Fetch the plan log and **analyse it** (see **Plan analysis** below):
+  3. Fetch the plan log and **analyse it** (see **Plan analysis** below). Keep only the resource and summary lines, not the whole log:
      ```
-     gh run view <run-id> --repo <TARGET_REPO> --log
+     gh run view <run-id> --repo <TARGET_REPO> --log | grep -E '# .* (will be|must be)|forces replacement|Plan:|No changes|Error|Warning' | head -n 200
      ```
+     If nothing matches, the plan format is not Terraform's: read `--log | tail -n 80` instead.
   4. Present the analysis verdict, then ask the **second** gate to confirm the `apply` workflow.
 - Never auto-chain plan → apply without the second gate.
 

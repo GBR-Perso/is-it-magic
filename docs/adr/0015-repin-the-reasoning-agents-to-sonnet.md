@@ -3,6 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-08-28
 **Supersedes**: [ADR-0012](0012-inherit-the-session-model-on-reasoning-agents.md)
+**Amended by**: [ADR-0023](0023-run-project-locator-and-scanner-devbox-on-haiku.md) (`project-locator` and `scanner-devbox` on Haiku)
 
 ## Context
 

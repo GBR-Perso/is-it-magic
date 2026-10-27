@@ -33,6 +33,8 @@ Where a decision post-dates the review, its own date says so.
 | [0019](0019-give-the-human-reader-a-proactive-door.md) | Give the human-reader path its own proactive door | Accepted | 2026-09-03 |
 | [0020](0020-move-the-investigation-report-into-a-file.md) | Move the investigation report into a file, print an executive digest | Superseded by ADR-0021 | 2026-09-16 |
 | [0021](0021-return-the-investigation-report-to-the-conversation.md) | Return the investigation report to the conversation, move the digest to the end | Accepted | 2026-09-18 |
+| [0022](0022-fork-repo-commit-and-confirm-every-push.md) | Fork repo-commit and confirm every push in the session | Accepted | 2026-10-27 |
+| [0023](0023-run-project-locator-and-scanner-devbox-on-haiku.md) | Run project-locator and scanner-devbox on Haiku | Accepted | 2026-10-27 |
 
 ## What is not here
 

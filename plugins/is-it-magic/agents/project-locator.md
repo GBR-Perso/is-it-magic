@@ -2,7 +2,7 @@
 name: "project-locator"
 description: "Resolves a natural-language project name to a verified local path and git metadata. Discovers candidate repositories from the current working directory (layout-agnostic), scores them against the input name, and returns the best match with confidence level and rationale.\n\nExamples:\n- assistant: \"I'll spawn the project-locator agent to resolve 'billing-api' to its local path.\"\n- assistant: \"Using the project-locator agent to find the repository for 'analytics dashboard'.\""
 tools: Bash, Glob, Read
-model: sonnet
+model: haiku
 color: cyan
 ---
 

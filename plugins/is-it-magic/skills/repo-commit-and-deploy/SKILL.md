@@ -51,7 +51,7 @@ Invoking `/repo-commit-and-deploy` directly **is** the authorisation for the who
 ### Phase 1 — Commit and push
 
 1. If a `commit:<path>` token is present, extract it as the commit scope and remove it from `$ARGUMENTS`; otherwise the commit is unscoped (all changes).
-2. Run the **repo-commit** process (**Run tests** through **Push**) for that scope, applying the gate policy above:
+2. Run the **repo-commit** process (**Run tests** through **Push**) for that scope, applying the gate policy above, and skip its **Hand back** step, which only a forked run uses:
    - Run tests for the scope. **If any fail → stop here. Do not proceed to Phase 2.**
    - Stage (per `repo-commit`'s staging rules — never `git add -A`), generate a conventional-commit message, commit.
    - **If there are no changes to commit**, note `nothing to commit — deploying current state` and continue to Phase 2 (do not stop — the user asked to deploy).

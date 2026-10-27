@@ -66,7 +66,7 @@ This syncs all bundled plugin rules into `~/.claude/rules/` so they load globall
 
 | Skill                       | Purpose                                                                                                                  |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `/repo-commit`              | Run the test suite, then stage, commit, and push to the current branch with a conventional-commit message. Tests gate the push. Pushes automatically on direct invocation; gates when invoked programmatically. |
+| `/repo-commit`              | Run the test suite, then stage, commit, and push to the current branch with a conventional-commit message. Tests gate the commit. Runs forked on Sonnet, so its cost does not grow with the session; the session asks before every push. |
 | `/repo-commit-and-deploy`   | Chain commit-and-push with a workflow trigger — commit, push, then fire the named deploy workflow(s). Gate-free on direct, fully-specified invocation (even prod); keeps all safety gates. |
 | `/repo-git-env`             | Manage GitHub environment variables and secrets from a JSON config — validates, confirms, and applies via `gh`.          |
 | `/repo-git-trigger-workflow`| Trigger GitHub Actions workflows via `workflow_dispatch`. Resolves shortnames (app, api, mcp, infra, all), gated by confirmation. |

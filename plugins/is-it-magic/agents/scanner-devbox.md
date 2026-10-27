@@ -6,7 +6,7 @@ tools:
   - Grep
   - Read
   - Bash
-model: sonnet
+model: haiku
 color: yellow
 ---
 
