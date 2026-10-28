@@ -1,20 +1,20 @@
 ---
 name: repo-commit-and-deploy
-description: "Chain a commit-and-push with a GitHub Actions workflow trigger in one step — commit the working tree (tests gate it), push, then fire the named deploy workflow(s). Use when you want to commit your work and kick off a deploy in a single command. Pushes and fires gate-free when you invoke it directly with scope and environment fully specified (even prod); keeps every safety gate. For commit-only, use repo-commit; for trigger-only, use repo-git-trigger-workflow."
+description: "Chain a commit-and-push with a GitHub Actions workflow trigger in one step — commit the working tree (tests gate it), push, then fire the named deploy workflow(s) and report their result. Use when you want to commit your work and kick off a deploy in a single command. Pushes and fires gate-free when you invoke it directly with scope and environment fully specified (even prod); keeps every safety gate. For commit-only, use repo-commit; for trigger-only, use repo-deploy."
 ---
 
-Chain **repo-commit** → **repo-git-trigger-workflow** in a single user-authorised step: commit and push the working tree, then trigger the deploy workflow(s) on the just-pushed state.
+Chain **repo-commit** → **repo-deploy** in a single user-authorised step: commit and push the working tree, then trigger the deploy workflow(s) on the just-pushed state.
 
 This skill **reuses the mechanics** of the two underlying skills rather than redefining them. Read both before executing:
 
 - Commit/push mechanics: `${CLAUDE_PLUGIN_ROOT}/skills/repo-commit/SKILL.md`
-- Workflow-trigger mechanics: `${CLAUDE_PLUGIN_ROOT}/skills/repo-git-trigger-workflow/SKILL.md`
+- Workflow-trigger mechanics: `${CLAUDE_PLUGIN_ROOT}/skills/repo-deploy/SKILL.md`
 
 Follow their detailed steps verbatim, but apply **this skill's gate policy** (below) — do not invoke them as separate skills, run their steps inline as one chain.
 
 ## Arguments
 
-`$ARGUMENTS` is **optional**. Everything in it is passed to the **trigger** step (workflow tokens + optional `on <project>` + environment / `key=value` inputs), exactly as `repo-git-trigger-workflow` parses them. The commit step commits **all** changes by default.
+`$ARGUMENTS` is **optional**. Everything in it is passed to the **trigger** step (workflow tokens + optional `on <project>` + environment / `key=value` inputs), exactly as `repo-deploy` parses them. The commit step commits **all** changes by default.
 
 - Optional `commit:<path>` token — if present, scope the **commit** to that subdirectory (passed to `repo-commit` as its scope) and strip it from the string before the trigger step parses the rest.
 
@@ -36,7 +36,7 @@ Read and follow the context resolution contract in `${CLAUDE_PLUGIN_ROOT}/skills
 Invoking `/repo-commit-and-deploy` directly **is** the authorisation for the whole chain — the user has asked to commit *and* deploy in one breath. Therefore:
 
 - **Routine push gate** (repo-commit's **Push** step) — **skipped**. Push without asking.
-- **Routine trigger gate** (repo-git-trigger-workflow's **Confirmation gate** step) — **skipped when scope and every required input (including `environment`) are fully specified** in `$ARGUMENTS` (even `environment=prod`). If a workflow token was missing/ambiguous, or a required input had to be defaulted or asked, the trigger gate applies as normal.
+- **Routine trigger gate** (repo-deploy's **Confirmation gate** step) — **skipped when scope and every required input (including `environment`) are fully specified** in `$ARGUMENTS` (even `environment=prod`). If a workflow token was missing/ambiguous, or a required input had to be defaulted or asked, the trigger gate applies as normal.
 - **When this skill is invoked programmatically** (by Claude via the Skill tool, another skill or workflow, or an agent/subagent — not a direct user slash command) → **both** routine gates apply. When the source is unclear, treat it as programmatic and gate.
 
 **Safety gates always apply — regardless of invocation source:**
@@ -44,7 +44,7 @@ Invoking `/repo-commit-and-deploy` directly **is** the authorisation for the who
 - Tests must pass (repo-commit's **Run tests** step). On any failure → report and **stop**. Do **not** commit, push, or deploy.
 - Rebase-conflict stop (repo-commit's **Pull and rebase** step). On conflict → abort the rebase and **stop**. The commit is saved locally; do **not** deploy.
 - Remote-owner mismatch check (repo-commit's **Context consistency check** step). On mismatch → ask before pushing; do not push or deploy until resolved.
-- Plan/apply review gate (repo-git-trigger-workflow's **Confirmation gate** step). Never auto-chain `plan` → `apply` without reviewing plan output.
+- Plan/apply review gate (repo-deploy's **Confirmation gate** step). Never auto-chain `plan` → `apply` without reviewing plan output.
 
 ## Process
 
@@ -62,11 +62,11 @@ Invoking `/repo-commit-and-deploy` directly **is** the authorisation for the who
 
 ### Phase 2 — Trigger deploy workflow(s)
 
-4. Run the **repo-git-trigger-workflow** process (**Parse arguments** through **Verify and report**) with the remaining `$ARGUMENTS`, applying the gate policy above:
+4. Run the **repo-deploy** process (**Parse arguments** through **Watch and report the result**) with the remaining `$ARGUMENTS`, applying the gate policy above:
    - Resolve the target repo, discover and resolve workflow tokens, discover and resolve inputs — exactly as that skill specifies.
    - Default the trigger to the repo's default branch (the branch just pushed in Phase 1) unless the arguments named one.
    - At the **Confirmation gate** step: **skip the routine confirmation gate** if scope and all required inputs (incl. `environment`) were fully specified in the arguments; otherwise gate. Always honour the plan/apply review split.
-   - Fire, verify, and report the queued run URLs.
+   - Fire, verify, watch and report each run's result.
 
 ## Output
 
@@ -74,12 +74,9 @@ Invoking `/repo-commit-and-deploy` directly **is** the authorisation for the who
 Committed: <commit-message>
 Pushed to: <branch>
 
-Triggered <N> workflow(s) on <TARGET_REPO>:
-  • <file>  → <status>  <url>
+<TARGET_REPO> — <N> runs finished
+  ✅ <file>  success  <duration>  <url>
   ...
-
-Watch them with:
-  gh run watch --repo <TARGET_REPO>
 ```
 
 If the chain stopped at a safety gate (tests failed, rebase conflict, remote mismatch, push failure), report exactly where it stopped and that **no deploy was triggered**.

@@ -1,11 +1,11 @@
 ---
-name: repo-git-trigger-workflow
-description: Trigger one or more GitHub Actions workflows via workflow_dispatch on a target repo. Resolves workflow shortnames by matching against the repo's discovered workflows and auto-detects required inputs. Fires immediately when the user invokes it directly with scope and all required inputs (including environment) fully specified — even for prod; otherwise gates firing behind explicit confirmation.
+name: repo-deploy
+description: Trigger one or more GitHub Actions workflows via workflow_dispatch on a target repo, then watch each run to the end and report whether it succeeded, with the failing step when it did not. Resolves workflow shortnames by matching against the repo's discovered workflows and auto-detects required inputs. Pass no-watch to return as soon as the runs are queued. Fires immediately when the user invokes it directly with scope and all required inputs (including environment) fully specified — even for prod; otherwise gates firing behind explicit confirmation.
 ---
 
 Trigger GitHub Actions workflows via `workflow_dispatch` on the current repo or a sibling project in the same org.
 
-The skill resolves the target repo, looks up which workflows match the user's shortlist, discovers each workflow's required inputs, asks for any missing values, shows a confirmation gate, then fires all selected workflows in parallel and reports the queued run URLs.
+The skill resolves the target repo, looks up which workflows match the user's shortlist, discovers each workflow's required inputs, asks for any missing values, shows a confirmation gate, then fires all selected workflows in parallel, watches every run to completion and reports each result.
 
 ## Arguments
 
@@ -13,12 +13,13 @@ The skill resolves the target repo, looks up which workflows match the user's sh
 
 **Examples:**
 
-- `/repo-git-trigger-workflow` → ask interactively
-- `/repo-git-trigger-workflow app` → trigger the workflow matching "app" on the current repo
-- `/repo-git-trigger-workflow app api mcp` → trigger workflows matching "app", "api", and "mcp" on the current repo
-- `/repo-git-trigger-workflow all` → trigger every workflow_dispatch-enabled workflow on the current repo
-- `/repo-git-trigger-workflow app on my-service` → trigger the "app" workflow on the repo matching "my-service"
-- `/repo-git-trigger-workflow api mcp on my-service prod` → trigger the "api" and "mcp" workflows on my-service with `environment=prod`
+- `/repo-deploy` → ask interactively
+- `/repo-deploy app` → trigger the workflow matching "app" on the current repo
+- `/repo-deploy app api mcp` → trigger workflows matching "app", "api", and "mcp" on the current repo
+- `/repo-deploy all` → trigger every workflow_dispatch-enabled workflow on the current repo
+- `/repo-deploy app on my-service` → trigger the "app" workflow on the repo matching "my-service"
+- `/repo-deploy api mcp on my-service prod` → trigger the "api" and "mcp" workflows on my-service with `environment=prod`
+- `/repo-deploy app no-watch` → trigger the "app" workflow and report as soon as it is queued
 
 ## Important rules
 
@@ -26,7 +27,7 @@ Read and follow all rules in `${CLAUDE_PLUGIN_ROOT}/skills/shared/_ux-rules.md`.
 
 ## Guardrails
 
-- **The confirmation gate is conditional** (see step 6). Fire *without* it only on a **direct, fully-specified user invocation** — the user personally typed `/repo-git-trigger-workflow` with the scope (workflow tokens) and every required input (including `environment`) supplied in the arguments. In **every** other case — programmatic invocation (Claude via the Skill tool, another skill/workflow, or an agent), or any value that was defaulted, asked, or interactively resolved — an explicit confirmation gate is **mandatory**, even for `qa`. When the source is unclear, treat it as programmatic and ask.
+- **The confirmation gate is conditional** (see step 6). Fire *without* it only on a **direct, fully-specified user invocation** — the user personally typed `/repo-deploy` with the scope (workflow tokens) and every required input (including `environment`) supplied in the arguments. In **every** other case — programmatic invocation (Claude via the Skill tool, another skill/workflow, or an agent), or any value that was defaulted, asked, or interactively resolved — an explicit confirmation gate is **mandatory**, even for `qa`. When the source is unclear, treat it as programmatic and ask.
 - The **plan/apply sequential gate** (step 6) is a safety mechanism and **always** applies — never auto-chain `plan` → `apply` without reviewing plan output, regardless of how the skill was invoked.
 - **Never** assume input values (especially `environment`) — read them from the user's arguments, or ask.
 - **Always** verify the target repo exists (`gh repo view`) before firing.
@@ -43,6 +44,7 @@ Extract from `$ARGUMENTS`:
 - **Project hint** — text after `on`, `for`, or `in` (e.g. `on my-service`). If absent, target the current repo.
 - **Environment / inputs** — bare tokens like `prod`, `qa`, `staging` are treated as candidate `environment` input values. Anything in `key=value` form is a direct input override.
 - **Branch** — text after `from` or `on branch` (e.g. `from main`, `on branch release/v2`). Defaults to the repo's default branch.
+- **`no-watch`** — skip step 9; the skill stops once the runs are queued.
 
 If no workflow tokens were given, ask via `AskUserQuestion` after step 2 (once the available workflows are known).
 
@@ -130,7 +132,7 @@ Store as `RESOLVED_INPUTS[workflow] = { key: value, ... }`.
 
 Skip the confirmation prompt and fire immediately — **even when `environment=prod`** — only when **all** of these hold:
 
-- **Direct user invocation** — the user personally typed `/repo-git-trigger-workflow …` this turn (not Claude via the Skill tool, not another skill or workflow, not an agent/subagent).
+- **Direct user invocation** — the user personally typed `/repo-deploy …` this turn (not Claude via the Skill tool, not another skill or workflow, not an agent/subagent).
 - **Scope fully specified** — every target workflow was resolved from explicit tokens in the user's arguments; nothing in step 3 was chosen through an interactive prompt.
 - **Inputs fully specified** — every required input, including `environment`, was taken directly from the user's arguments (step 5 case 1 or 2). None fell back to a default (case 3) or had to be asked (case 4).
 
@@ -216,7 +218,7 @@ For each fired workflow, run:
 gh run list --workflow=<file> --repo <TARGET_REPO> --limit 1
 ```
 
-Confirm the run shows up with status `queued` or `in_progress` and a recent timestamp (within the last ~60 seconds — older means we matched a previous run).
+Confirm the run shows up with status `queued` or `in_progress` and a recent timestamp (within the last ~60 seconds — older means we matched a previous run). Keep its `databaseId` for step 9.
 
 Print:
 
@@ -226,15 +228,46 @@ Triggered <N> workflows on <TARGET_REPO>:
   • <file>  → <status>  <url>
   • <file>  → <status>  <url>
   ...
-
-Watch them with:
-  gh run watch --repo <TARGET_REPO>
 ```
 
 If any `gh workflow run` returned an error, list it explicitly and do not pretend the run was queued.
+
+With `no-watch`, add `Watch them with: gh run watch --repo <TARGET_REPO>` and stop.
+
+### 9. Watch and report the result
+
+Watch every queued run until it completes, all runs in parallel. A deploy outlives a foreground command timeout, so run each watch in the background where the harness allows it:
+
+```
+gh run watch <run-id> --repo <TARGET_REPO> --exit-status --interval 30 > /dev/null
+```
+
+When a run completes, read its outcome:
+
+```
+gh run view <run-id> --repo <TARGET_REPO> --json conclusion,url,createdAt,updatedAt,jobs
+```
+
+For a run whose `conclusion` is not `success`, name the failed job and step and show the end of its failed log:
+
+```
+gh run view <run-id> --repo <TARGET_REPO> --log-failed | tail -n 40
+```
+
+Print:
+
+```
+<TARGET_REPO> — <N> runs finished
+
+  ✅ <file>  success  <duration>  <url>
+  ❌ <file>  failure  <duration>  <url>
+       job <job> › step <step>
+       <last relevant log lines>
+```
 
 ## Verification
 
 - Every selected workflow appears in `gh run list` with status `queued` or `in_progress` and a fresh timestamp.
 - `gh run view <run-id> --repo <TARGET_REPO>` resolves for each printed URL.
+- Unless `no-watch` was given, every run's final conclusion was reported, never only its queued state.
 - No workflow was fired without passing through the step 6 gate — **except** on a direct, fully-specified user invocation, where the routine gate is intentionally skipped (the plan/apply review gate still applies).
