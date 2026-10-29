@@ -34,6 +34,9 @@ sub-agents documentation removes it from every subagent's tools. Nor can it tell
   own gate policy.
 - Untested in a plugin: the documentation describes these fields for skills without saying whether a
   plugin's skills honour them. The first run after release confirms it.
+- First run (2026-10-28): on a typed `/repo-commit` the fork's hand-back is shown to the user directly
+  and the session gets no turn, so it cannot ask. The hand-back now asks the user to reply `push`, and
+  that reply is the confirmation. A model-invoked run still asks via `AskUserQuestion`.
 
 ## Alternatives considered
 

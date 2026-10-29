@@ -20,8 +20,11 @@ background: false
 ## Runs as a fork
 
 This skill runs as a forked subagent: it sees `$ARGUMENTS` and the repository, not the conversation, and
-it cannot ask the user anything. It runs steps 1 to 5 and never pushes; the session that invoked it asks
-and pushes (step 6). See ADR-0022.
+it cannot ask the user anything. It runs steps 1 to 5 and never pushes; the session pushes (step 6). See
+ADR-0022. `repo-commit-and-deploy` does not fork: it runs steps 1 to 4a and 6 inline, and pushes itself.
+
+When the user types `/repo-commit`, the hand-back is shown to them directly and the session gets no turn
+until they reply, so the hand-back asks them to reply `push`.
 
 ## Important rules
 
@@ -97,21 +100,26 @@ Committed: <commit-message, first line>
 Branch:    <branch>
 Rebased:   <yes — N remote commits | no>
 Remote:    <owner matches <context> | MISMATCH — remote owner <x>, context expects <y> | no context>
-Next:      ask the user via AskUserQuestion before pushing — `Push now (Recommended)` / `Don't push — leave the commit local`; on yes run `git -C <repo root> push`. Never force-push.
+Next:      reply `push` to push it to origin, or leave the commit local.
 ```
 
-On a mismatch the `Next` options are `Push anyway — I've verified this is correct` / `Cancel push — I'll
-fix the remote first`. If the run stopped at step 1 or 4, report where and why instead, with no `Next`
+On a mismatch the `Next` line is: `the remote owner does not match the context — reply push only once you
+have checked it is correct.` If the run stopped at step 1 or 4, report where and why instead, with no `Next`
 line.
 
 ### 6. Push
 
 Run by whoever holds the conversation, never by the fork: the invoking session for `/repo-commit`, the
-chain itself inside `repo-commit-and-deploy`. The push is always confirmed first, as the hand-back's
-`Next` line says (ADR-0008).
+chain itself inside `repo-commit-and-deploy`. The push is confirmed first (ADR-0008):
+
+- The user replied `push` to the hand-back → that is the confirmation; push.
+- Claude invoked the skill through the Skill tool → ask via `AskUserQuestion` (`Push now (Recommended)` /
+  `Don't push — leave the commit local`, or the mismatch wording above) before pushing.
+- Run inline by `repo-commit-and-deploy` → that skill's gate policy decides; a typed invocation is the
+  confirmation, a mismatch still asks per step 4a.
 
 ```bash
-git push
+git -C <repo root> push
 ```
 
 Never force-push. If push fails, report the error and stop.
