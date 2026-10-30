@@ -1,6 +1,6 @@
 {
   "name": "is-it-magic",
-  "version": "9.0.1",
+  "version": "10.0.0",
   "description": "General AI development workflow — agents, orchestration skills, language rules, and machine setup.",
   "skills": "./skills/"
 }

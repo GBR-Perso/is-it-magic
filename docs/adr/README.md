@@ -35,6 +35,7 @@ Where a decision post-dates the review, its own date says so.
 | [0021](0021-return-the-investigation-report-to-the-conversation.md) | Return the investigation report to the conversation, move the digest to the end | Accepted | 2026-09-18 |
 | [0022](0022-fork-repo-commit-and-confirm-every-push.md) | Fork repo-commit and confirm every push in the session | Accepted | 2026-10-27 |
 | [0023](0023-run-project-locator-and-scanner-devbox-on-haiku.md) | Run project-locator and scanner-devbox on Haiku | Accepted | 2026-10-27 |
+| [0024](0024-retire-project-port.md) | Retire project-port | Accepted | 2026-10-30 |
 
 ## What is not here
 
