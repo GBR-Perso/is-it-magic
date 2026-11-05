@@ -1,6 +1,6 @@
 ---
 name: explain
-description: "Explain something on a short throwaway page — What, Why, How, one worked example — published as the project's single scratchpad Artifact (scratchpad-<project folder>), updated when the subject is the same and wiped and rewritten when it is new. Also re-explains something that came out obscure, re-derived from the source rather than from the earlier wording. Use whenever the user wants to understand something or signals an explanation missed — 'explain', 'I don't get it', 'you lost me', 'what is this', 'why does it', 'more simply', 'in plain English', 'ELI5', 'dumb it down', 'too much jargon', 'make me a page about' — even if they never say 'page' or 'artifact'."
+description: "Explain something on a short throwaway page — What, Why, How, one worked example — published as the project's single scratchpad Artifact (scratchpad- followed by the project folder name), updated when the subject is the same and wiped and rewritten when it is new. Also re-explains something that came out obscure, re-derived from the source rather than from the earlier wording. Use whenever the user wants to understand something or signals an explanation missed — 'explain', 'I don't get it', 'you lost me', 'what is this', 'why does it', 'more simply', 'in plain English', 'ELI5', 'dumb it down', 'too much jargon', 'make me a page about' — even if they never say 'page' or 'artifact'."
 ---
 
 Make the user understand one thing, on one short page they can glance at beside the work.
