@@ -37,6 +37,7 @@ Where a decision post-dates the review, its own date says so.
 | [0023](0023-run-project-locator-and-scanner-devbox-on-haiku.md) | Run project-locator and scanner-devbox on Haiku | Accepted | 2026-10-27 |
 | [0024](0024-retire-project-port.md) | Retire project-port | Accepted | 2026-10-30 |
 | [0025](0025-explain-on-a-throwaway-scratchpad-page.md) | Explain on a throwaway scratchpad page | Accepted | 2026-11-05 |
+| [0026](0026-add-an-inline-test-free-commit-skill.md) | Add an inline, test-free commit skill | Accepted | 2026-11-09 |
 
 ## What is not here
 
