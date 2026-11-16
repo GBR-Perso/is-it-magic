@@ -13,84 +13,83 @@ paths:
 ## Format
 
 ```
-<prefix><project><purpose><resourceType><environment><uniqueIdentifier>
+rise<project><purpose><resourceType><environment><index>
 ```
 
-All names are **lowercase**, no hyphens, no underscores.
-
-## Prefix
-
-The prefix identifies the **organisation or context** that owns the resources — it is not related to the Azure tenant or subscription. It is defined per project.
-
-**How to determine the prefix:**
-1. Check `project-context.md` (or `.claude/project-context.md`) for a `naming_prefix` or `prefix` field.
-2. If not defined there, check if existing resources in the codebase (`.tf`, `.tfvars`) establish a consistent prefix.
-3. If still unknown, ask the user before creating or naming any resource.
-
-Common values: `ekla` (personal/ekla projects). Any short lowercase string is valid.
-
-**Never assume the prefix.** If you are unsure, ask.
+All names are **lowercase**, no hyphens, no underscores. Example: `risesharergprod01`.
 
 ## Components
 
-| Component          | Description                         | Constraint                                                    |
-| ------------------ | ----------------------------------- | ------------------------------------------------------------- |
-| `<prefix>`         | Organisation/context identifier     | Determined per project (see above)                            |
-| `project`          | Project name                        | 12-char max                                                   |
-| `purpose`          | Optional specificity qualifier      | `project` + `purpose` combined ≤ 12 chars                     |
-| `resourceType`     | Shorthand code from the table below | Must exist in the table                                       |
-| `environment`      | Environment                         | `dev`, `qa`, `prod`                                           |
-| `uniqueIdentifier` | Two-digit sequential number         | e.g. `01`, `02`                                               |
+| Component      | Rule                                                                                         |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| `rise`         | Fixed prefix for every resource                                                              |
+| `project`      | The app or product. At most 12 characters. Shared services use `share`                       |
+| `purpose`      | Optional, from the purpose codes below. `project` + `purpose` together: at most 12 characters |
+| `resourceType` | Microsoft's abbreviation for the resource type (see below)                                   |
+| `environment`  | `dev`, `qa` or `prod`                                                                        |
+| `index`        | Two digits: `01`, `02`                                                                       |
 
-### Purpose values
+The 12-character cap keeps the tightest Azure names inside their limit: a storage account or a Key Vault allows 24 characters.
 
-Common codes below. When none says what the resource is for, use a short lowercase word that does (e.g. `mail`, `sync`); prefer it to `sc`.
+### Purpose codes
 
-| Code  | Meaning                                                                                                 |
-| ----- | ------------------------------------------------------------------------------------------------------- |
-| `fe`  | Frontend                                                                                                |
-| `be`  | Backend                                                                                                 |
-| `mcp` | MCP server                                                                                              |
-| `sc`  | Service client (standalone identity — not tied to a specific fe/be, acts as its own security principal) |
+| Code                       | Meaning                                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| `be`                       | Backend                                                                                        |
+| `fe`                       | Frontend                                                                                       |
+| `mcp`                      | MCP server                                                                                     |
+| `sc`                       | Service client: a standalone identity that is its own security principal                       |
+| `free`                     | A Free App Service plan                                                                        |
+| `sub`, `svc`, `bl`, `rg`   | What a cost view groups spend by: subscription, service, business line, resource group         |
 
-Omit `purpose` when not needed.
+An App Service always has a purpose: `be` or `mcp`. Omit `purpose` elsewhere when it adds nothing.
 
-### Shared services
+### When `project` + `purpose` is over 12 characters
 
-For common/shared services, use project name `share` → e.g. `<prefix>sharergprod01`.
+Shorten the product name. Never drop the purpose. Example: `datagateway` + a domain becomes `dg` + domain (`dggeo`, `dgfx`). An abbreviation needs sign-off from the naming-convention owner.
 
-## Resource Type Shorthand Codes
+## Resource type codes
 
-| Resource                       | Code    |
-| ------------------------------ | ------- |
-| Resource Group                 | `rg`    |
-| App Service                    | `api`   |
-| Static Web App                 | `app`   |
-| Database                       | `db`    |
-| Database Server                | `dbsrv` |
-| Function App                   | `fa`    |
-| Service Plan                   | `sp`    |
-| Storage Account                | `sa`    |
-| Application Insight            | `ai`    |
-| Application Registration       | `ar`    |
-| Key Vault                      | `kv`    |
-| Container Registry             | `cr`    |
-| User-Assigned Managed Identity | `id`    |
-| Container Apps Environment     | `caenv` |
-| Container App                  | `ca`    |
+**Microsoft's [abbreviation list](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations) is the table.** Read the code there, every time. The common ones:
 
-## Examples
+| Resource                         | Code    |
+| -------------------------------- | ------- |
+| Resource group                   | `rg`    |
+| App Service (web app)            | `app`   |
+| App Service plan                 | `asp`   |
+| Function app                     | `func`  |
+| Static web app                   | `stapp` |
+| Logic app                        | `logic` |
+| Azure SQL server                 | `sql`   |
+| Azure SQL database               | `sqldb` |
+| Storage account                  | `st`    |
+| Key Vault                        | `kv`    |
+| Container registry               | `cr`    |
+| User-assigned managed identity   | `id`    |
+| Application Insights             | `appi`  |
+| Log Analytics workspace          | `log`   |
+| Container Apps environment       | `cae`   |
+| Container app                    | `ca`    |
 
-Using prefix `ekla`:
-- Resource Group: `eklasandboxrgprod01`
-- App Registration (Frontend): `eklasandboxfearprod01`
+Codes Microsoft's list does not have:
 
-## When a resource type is missing
+| Resource                                                  | Code   |
+| --------------------------------------------------------- | ------ |
+| Entra app registration                                    | `ar`   |
+| Budget (`Microsoft.Consumption/budgets`)                  | `bud`  |
+| Cost anomaly alert (`Microsoft.CostManagement/scheduledActions`) | `anom` |
+| Cost analysis saved view (`Microsoft.CostManagement/views`)     | `cv`   |
 
-**If the Azure resource you are creating does not have a shorthand code in the table above, you MUST stop and tell the user.** Do not invent a code. Ask the user to define one following these rules:
+Examples: `riseairfarebeappprod01` (an API), `riseairfaremcpappprod01` (its MCP), `risesharefreeaspprod01` (a shared Free plan), `risesandboxfearprod01` (a frontend app registration).
 
-- 2–6 characters, clearly representing the resource (e.g. `eh` for Event Hub, `cosmos` for Cosmos DB)
-- Must be unique within the table
-- Must be easy to understand
+**A name is never changed only to follow the rule.** Most Azure resources cannot be renamed. An older code (`api`, `sp`, `caenv`, `fa`, `app` for a Static Web App) goes when its resource is recreated for another reason.
 
-Once agreed, the user will update this convention.
+## Names inside a resource
+
+Something that exists only inside one resource (a firewall rule, a blob container, a Key Vault secret) is named by its purpose alone, in lowercase kebab-case: `terraform-state`. Its parent's name already carries prefix, project and environment.
+
+A Key Vault secret is `<service>-<credential>`: `service` is the external system in one word, `credential` one of `api-key`, `client-id`, `client-secret`, `username`, `password`, `connection-string`, `token`, `signing-key`. Example: `countrystatecity-api-key`. The name never carries an app's setting name.
+
+## When Microsoft has no code
+
+**Stop and tell the user.** Do not invent a code. Ask for one to be defined: 2 to 6 characters, unique, obvious.
