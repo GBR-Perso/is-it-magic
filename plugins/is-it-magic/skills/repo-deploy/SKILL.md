@@ -128,6 +128,8 @@ Store as `RESOLVED_INPUTS[workflow] = { key: value, ... }`.
 
 ### 6. Confirmation gate
 
+**Always applies, even on a direct fully-specified invocation:** the deploy hold in `${CLAUDE_PLUGIN_ROOT}/skills/shared/_project-deploy-steps.md`. Run its **Deploy hold** once per distinct resolved `environment` declared there, across all selected workflows, before firing any.
+
 **Gate applicability — decide first whether the routine confirmation is required.**
 
 Skip the confirmation prompt and fire immediately — **even when `environment=prod`** — only when **all** of these hold:

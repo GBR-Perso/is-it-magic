@@ -103,6 +103,8 @@ Remote:    <owner matches <context> | MISMATCH — remote owner <x>, context exp
 Next:      reply `push` to push it to origin, or leave the commit local.
 ```
 
+If `.claude/commit-and-deploy.json` exists and the commit added files under its `migrationsPath`, add the line `Schema:    migrations added, scripts not generated — run <generate> (or use /repo-commit-and-deploy) before deploying QA or prod.` after `Remote:`. Generate nothing here (`${CLAUDE_PLUGIN_ROOT}/skills/shared/_project-deploy-steps.md`).
+
 On a mismatch the `Next` line is: `the remote owner does not match the context — reply push only once you
 have checked it is correct.` If the run stopped at step 1 or 4, report where and why instead, with no `Next`
 line.

@@ -1,6 +1,6 @@
 ---
 name: repo-commit-and-deploy
-description: "Chain a commit-and-push with a GitHub Actions workflow trigger in one step — commit the working tree (tests gate it), push, then fire the named deploy workflow(s) and report their result. Use when you want to commit your work and kick off a deploy in a single command. Pushes and fires gate-free when you invoke it directly with scope and environment fully specified (even prod); keeps every safety gate. For commit-only, use repo-commit; for trigger-only, use repo-deploy."
+description: "Chain a commit-and-push with a GitHub Actions workflow trigger in one step — commit the working tree (tests gate it), push, then fire the named deploy workflow(s) and report their result. Generates and commits a project's declared QA/prod schema scripts, and holds a QA/prod deploy until they have been run. Use when you want to commit your work and kick off a deploy in a single command. Pushes and fires gate-free when you invoke it directly with scope and environment fully specified (even prod); keeps every safety gate. For commit-only, use repo-commit; for trigger-only, use repo-deploy."
 ---
 
 Chain **repo-commit** → **repo-deploy** in a single user-authorised step: commit and push the working tree, then trigger the deploy workflow(s) on the just-pushed state.
@@ -45,6 +45,8 @@ Invoking `/repo-commit-and-deploy` directly **is** the authorisation for the who
 - Rebase-conflict stop (repo-commit's **Pull and rebase** step). On conflict → abort the rebase and **stop**. The commit is saved locally; do **not** deploy.
 - Remote-owner mismatch check (repo-commit's **Context consistency check** step). On mismatch → ask before pushing; do not push or deploy until resolved.
 - Plan/apply review gate (repo-deploy's **Confirmation gate** step). Never auto-chain `plan` → `apply` without reviewing plan output.
+- Schema-script hold (`${CLAUDE_PLUGIN_ROOT}/skills/shared/_project-deploy-steps.md`, **Deploy hold**). A QA or prod deploy whose environment the project declares fires only once the user confirms the script was run, or nothing is outstanding. Applies even when gate-free; repo-deploy's **Confirmation gate** step runs it.
+- Schema-script generation (same file, **Commit-time generation**). Non-zero exit or not runnable → report the reason and **stop** before committing.
 
 ## Process
 
@@ -53,6 +55,7 @@ Invoking `/repo-commit-and-deploy` directly **is** the authorisation for the who
 1. If a `commit:<path>` token is present, extract it as the commit scope and remove it from `$ARGUMENTS`; otherwise the commit is unscoped (all changes).
 2. Run the **repo-commit** process (**Run tests** through **Push**) for that scope, applying the gate policy above, and skip its **Hand back** step, which only a forked run uses:
    - Run tests for the scope. **If any fail → stop here. Do not proceed to Phase 2.**
+   - Run the project's declared schema-script generation (`${CLAUDE_PLUGIN_ROOT}/skills/shared/_project-deploy-steps.md`, **Commit-time generation**), then stage its scripts with the rest. Skipped when `commit:<path>` excludes the migrations path.
    - Stage (per `repo-commit`'s staging rules — never `git add -A`), generate a conventional-commit message, commit.
    - **If there are no changes to commit**, note `nothing to commit — deploying current state` and continue to Phase 2 (do not stop — the user asked to deploy).
    - Pull/rebase. **On conflict → stop.** Do not proceed to Phase 2.
@@ -78,5 +81,7 @@ Pushed to: <branch>
   ✅ <file>  success  <duration>  <url>
   ...
 ```
+
+After a commit that generated scripts, add the **Reporting scripts** report from `${CLAUDE_PLUGIN_ROOT}/skills/shared/_project-deploy-steps.md`.
 
 If the chain stopped at a safety gate (tests failed, rebase conflict, remote mismatch, push failure), report exactly where it stopped and that **no deploy was triggered**.
