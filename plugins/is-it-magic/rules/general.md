@@ -29,6 +29,7 @@ Never work around a missing tool with a global install or an ad-hoc fetch — ad
 - No abstractions for single-use code; no "flexibility" or configurability that wasn't requested
 - No error handling for impossible scenarios
 - If your code could be half the size, rewrite it before handing it over.
+- **One-off work is never app code.** An export, pairing, mapping, repair or backfill that runs once is done as throwaway scratch work (script, query, scratch test) outside the app — no entity, migration, endpoint or test suite. Ask before treating it as a feature.
 
 ## Surgical Changes
 

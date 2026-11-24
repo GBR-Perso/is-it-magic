@@ -66,6 +66,7 @@ Present the Quick Context Summary to the user, then judge whether it gives enoug
 5. For each idea the user brings up:
    - **Explore** — ask open-ended questions to flesh out the idea (who benefits, what problem it solves, what would success look like)
    - **Challenge** — raise edge cases, user experience concerns, or scope questions — but stay at the _what_, never the _how_
+   - **One-off or feature?** — if something runs once (an export, pairing, mapping, repair, backfill), write it in the document as one-off scratch work outside the app, so no implementation run builds it as a feature
    - **Resolve** — every question raised must be answered before moving on, even if the answer is approximate (e.g. "we'll refine this later" or "good enough for now"). Do not leave open questions dangling.
    - **Capture** — summarise the idea as a short requirement statement
    - **Split** — if the idea covers multiple independent concerns, propose splitting it into separate epics rather than letting scope grow unchecked.
