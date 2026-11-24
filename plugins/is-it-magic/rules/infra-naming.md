@@ -8,7 +8,7 @@ paths:
 
 # Azure Resource Naming Convention
 
-**This is mandatory.** Every Azure resource name MUST follow this convention. No exceptions.
+**This is mandatory.** Every Azure resource name, and every Cloudflare Pages project name, MUST follow this convention. No exceptions.
 
 ## Format
 
@@ -58,7 +58,7 @@ Shorten the product name. Never drop the purpose. Example: `datagateway` + a dom
 | App Service (web app)            | `app`   |
 | App Service plan                 | `asp`   |
 | Function app                     | `func`  |
-| Static web app                   | `stapp` |
+| Static web app, or Cloudflare Pages project | `stapp` |
 | Logic app                        | `logic` |
 | Azure SQL server                 | `sql`   |
 | Azure SQL database               | `sqldb` |
@@ -79,10 +79,11 @@ Codes Microsoft's list does not have:
 | Budget (`Microsoft.Consumption/budgets`)                  | `bud`  |
 | Cost anomaly alert (`Microsoft.CostManagement/scheduledActions`) | `anom` |
 | Cost analysis saved view (`Microsoft.CostManagement/views`)     | `cv`   |
+| Log search alert rule (`Microsoft.Insights/scheduledQueryRules`) | `sqr`  |
 
 Examples: `riseairfarebeappprod01` (an API), `riseairfaremcpappprod01` (its MCP), `risesharefreeaspprod01` (a shared Free plan), `risesandboxfearprod01` (a frontend app registration).
 
-**A name is never changed only to follow the rule.** Most Azure resources cannot be renamed. An older code (`api`, `sp`, `caenv`, `fa`, `app` for a Static Web App) goes when its resource is recreated for another reason.
+**A name is never changed only to follow the rule.** Most Azure resources cannot be renamed. An older code (`api`, `sp`, `caenv`, `fa`, `app` for a Static Web App or a Pages project) goes when its resource is recreated for another reason.
 
 ## Names inside a resource
 
