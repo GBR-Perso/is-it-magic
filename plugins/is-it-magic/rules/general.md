@@ -58,6 +58,13 @@ Comments are the exception. The code is the specification.
 - Pre-existing comments are reported, never swept.
 - Controller XML docs (`///`, feeding the OpenAPI spec) are API documentation, not comments: outside these rules and the budget. Keep them to what an API consumer needs.
 
+## Memory
+
+- If the project's `CLAUDE.md` imports a committed memory file, record memories there, as an edit to the repo committed with the work. Never use auto memory.
+- Only when no such file exists, use auto memory as normal.
+- The convention: `.claude/memory.md`, imported from `.claude/CLAUDE.md`, plus `"autoMemoryEnabled": false` in committed `.claude/settings.json`.
+- A memory is a fact the repo does not already record. Never duplicate something stated elsewhere in the repo.
+
 ## Reason Before You Act
 
 - Re-read what was actually asked before committing to an approach — don't lock onto the first idea.
